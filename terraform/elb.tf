@@ -54,7 +54,13 @@ resource "aws_lb_listener_rule" "app" {
 }
 
 resource "aws_lb_target_group" "app" {
-  name        = "${local.project_name}-app"
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  # Workaround for error that "name_prefix" cannot be longer than 6 characters
+  name_prefix = "app-"
+
   port        = 8080
   protocol    = "HTTP"
   vpc_id      = module.vpc.vpc_id
