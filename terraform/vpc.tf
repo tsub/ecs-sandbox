@@ -2,7 +2,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "2.15.0"
 
-  name = "tsub-sandbox"
+  name = local.project_name
   cidr = "10.0.0.0/16"
 
   azs             = ["ap-northeast-1a", "ap-northeast-1c", "ap-northeast-1d"]
