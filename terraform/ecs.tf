@@ -1,3 +1,11 @@
+data "template_file" "task-definition-app" {
+  template = file("${path.module}/task_definitions/app.json")
+
+  vars = {
+    app_log_group_name = aws_cloudwatch_log_group.app.name
+  }
+}
+
 resource "aws_ecs_cluster" "main" {
   name = local.project_name
 
@@ -9,22 +17,23 @@ resource "aws_ecs_cluster" "main" {
 
 resource "aws_ecs_task_definition" "app" {
   family                   = "${local.project_name}-app"
-  container_definitions    = "${file("task_definitions/app.json")}"
+  container_definitions    = data.template_file.task-definition-app.rendered
   requires_compatibilities = ["FARGATE"]
   cpu                      = 0.25 * 1024
   memory                   = 512
   network_mode             = "awsvpc"
+  execution_role_arn       = aws_iam_role.app.arn
 }
 
 resource "aws_ecs_service" "app" {
   name            = "${local.project_name}-app"
-  cluster         = "${aws_ecs_cluster.main.id}"
-  task_definition = "${aws_ecs_task_definition.app.arn}"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.app.arn
   launch_type     = "FARGATE"
   desired_count   = 3
 
   load_balancer {
-    target_group_arn = "${aws_lb_target_group.app.arn}"
+    target_group_arn = aws_lb_target_group.app.arn
     container_name   = "app"
     container_port   = 80
   }
