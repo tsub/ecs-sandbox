@@ -61,10 +61,11 @@ resource "aws_lb_target_group" "app" {
   # Workaround for error that "name_prefix" cannot be longer than 6 characters
   name_prefix = "app-"
 
-  port        = 8080
-  protocol    = "HTTP"
-  vpc_id      = module.vpc.vpc_id
-  target_type = "ip"
+  port                 = 8080
+  protocol             = "HTTP"
+  vpc_id               = module.vpc.vpc_id
+  target_type          = "ip"
+  deregistration_delay = 60
 
   health_check {
     path     = "/healthz"
