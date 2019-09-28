@@ -1,0 +1,25 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      docker: 18
+
+    commands:
+      - aws --version
+
+  pre_build:
+    commands:
+      - |
+        ECR_IMAGE_SOURCE_PATH="$CODEBUILD_SRC_DIR/imageDetail.json"
+        cat $ECR_IMAGE_SOURCE_PATH | jq .
+      - |
+        IMAGE_URI=$(cat $ECR_IMAGE_SOURCE_PATH | jq -r '.ImageURI')
+        echo $IMAGE_URI
+
+  build:
+    commands:
+      - printf '[{"name":"app","imageUri":"%s"}]' $IMAGE_URI > imagedefinitions.json
+
+artifacts:
+    files: imagedefinitions.json
