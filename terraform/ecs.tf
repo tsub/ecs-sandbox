@@ -2,6 +2,7 @@ data "template_file" "task-definition-app" {
   template = file("${path.module}/task_definitions/app.json")
 
   vars = {
+    app_image_url      = aws_ecr_repository.app.repository_url
     app_log_group_name = aws_cloudwatch_log_group.app.name
   }
 }
@@ -35,7 +36,7 @@ resource "aws_ecs_service" "app" {
   load_balancer {
     target_group_arn = aws_lb_target_group.app.arn
     container_name   = "app"
-    container_port   = 80
+    container_port   = 8080
   }
 
   network_configuration {

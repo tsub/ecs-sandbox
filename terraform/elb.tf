@@ -55,14 +55,14 @@ resource "aws_lb_listener_rule" "app" {
 
 resource "aws_lb_target_group" "app" {
   name        = "${local.project_name}-app"
-  port        = 80
+  port        = 8080
   protocol    = "HTTP"
   vpc_id      = module.vpc.vpc_id
   target_type = "ip"
 
   health_check {
-    path     = "/"
-    port     = 80
+    path     = "/healthz"
+    port     = 8080
     protocol = "HTTP"
     matcher  = "200"
   }
