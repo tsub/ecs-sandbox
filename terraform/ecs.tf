@@ -12,7 +12,7 @@ resource "aws_ecs_task_definition" "app" {
   container_definitions    = "${file("task_definitions/app.json")}"
   requires_compatibilities = ["FARGATE"]
   cpu                      = 0.25 * 1024
-  memory                   = "0.5GB"
+  memory                   = 512
   network_mode             = "awsvpc"
 }
 
