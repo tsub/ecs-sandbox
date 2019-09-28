@@ -1,0 +1,13 @@
+[
+  {
+    "name": "app",
+    "image": "httpd",
+    "essential": true,
+    "portMappings": [
+      {
+        "containerPort": 80,
+        "hostPort": 80
+      }
+    ]
+  }
+]
