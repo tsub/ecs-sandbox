@@ -2,7 +2,7 @@ data "template_file" "task-definition-app" {
   template = file("${path.module}/task_definitions/app.json")
 
   vars = {
-    app_image_url      = aws_ecr_repository.app.repository_url
+    app_image          = "${aws_ecr_repository.app.repository_url}@${data.aws_ecr_image.app.image_digest}"
     app_log_group_name = aws_cloudwatch_log_group.app.name
   }
 }
