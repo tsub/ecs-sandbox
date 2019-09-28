@@ -12,7 +12,7 @@
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
-        "awslogs-region": "ap-northeast-1",
+        "awslogs-region": "${app_log_region}",
         "awslogs-group": "${app_log_group_name}",
         "awslogs-stream-prefix": "fargate"
       }

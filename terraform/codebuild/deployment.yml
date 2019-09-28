@@ -14,7 +14,7 @@ phases:
         ECR_IMAGE_SOURCE_PATH="$CODEBUILD_SRC_DIR/imageDetail.json"
         cat $ECR_IMAGE_SOURCE_PATH | jq .
       - |
-        IMAGE_URI=$(cat $ECR_IMAGE_SOURCE_PATH | jq -r '.ImageURI')
+        IMAGE_URI=$(cat $ECR_IMAGE_SOURCE_PATH | jq -r '.ImageURI' | cut -d "@" -f 1)
         echo $IMAGE_URI
 
   build:

@@ -1,8 +1,3 @@
-data "aws_ecr_image" "app" {
-  repository_name = aws_ecr_repository.app.name
-  image_tag       = "latest"
-}
-
 resource "aws_ecr_repository" "app" {
   name = "${local.project_name}/app"
 }

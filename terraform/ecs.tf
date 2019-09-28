@@ -1,10 +1,18 @@
+data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
+
 data "template_file" "task-definition-app" {
   template = file("${path.module}/task_definitions/app.json")
 
   vars = {
-    app_image          = "${aws_ecr_repository.app.repository_url}@${data.aws_ecr_image.app.image_digest}"
+    app_image          = aws_ecr_repository.app.repository_url
     app_log_group_name = aws_cloudwatch_log_group.app.name
+    app_log_region     = data.aws_region.current.name
   }
+}
+
+data "aws_ecs_task_definition" "app" {
+  task_definition = "${aws_ecs_task_definition.app.family}"
 }
 
 resource "aws_ecs_cluster" "main" {
@@ -29,7 +37,7 @@ resource "aws_ecs_task_definition" "app" {
 resource "aws_ecs_service" "app" {
   name            = "${local.project_name}-app"
   cluster         = aws_ecs_cluster.main.id
-  task_definition = aws_ecs_task_definition.app.arn
+  task_definition = "arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:task-definition/${aws_ecs_task_definition.app.family}:${max("${aws_ecs_task_definition.app.revision}", "${data.aws_ecs_task_definition.app.revision}")}"
   launch_type     = "FARGATE"
   desired_count   = 3
 
