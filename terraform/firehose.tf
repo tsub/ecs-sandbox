@@ -14,5 +14,18 @@ resource "aws_kinesis_firehose_delivery_stream" "firelens" {
       log_group_name  = aws_cloudwatch_log_group.firehose.name
       log_stream_name = aws_cloudwatch_log_stream.firelens.name
     }
+
+    processing_configuration {
+      enabled = "true"
+
+      processors {
+        type = "Lambda"
+
+        parameters {
+          parameter_name  = "LambdaArn"
+          parameter_value = "${aws_lambda_function.json-parse.arn}:$LATEST"
+        }
+      }
+    }
   }
 }

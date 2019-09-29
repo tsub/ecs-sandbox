@@ -422,6 +422,15 @@ data "aws_iam_policy_document" "firehose-to-s3" {
 
     resources = [aws_cloudwatch_log_group.firehose.arn]
   }
+
+  statement {
+    actions = [
+      "lambda:InvokeFunction",
+      "lambda:GetFunctionConfiguration"
+    ]
+
+    resources = ["${aws_lambda_function.json-parse.arn}:*"]
+  }
 }
 
 resource "aws_iam_role" "firehose" {
@@ -561,4 +570,46 @@ resource "aws_iam_policy" "glue" {
     ]
 }
 EOF
+}
+
+# Lambda
+
+data "aws_iam_policy_document" "lambda" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "lambda-logs" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role" "lambda" {
+  name               = "${local.project_name}-lambda"
+  assume_role_policy = data.aws_iam_policy_document.lambda.json
+}
+
+resource "aws_iam_role_policy_attachment" "lambda" {
+  role       = aws_iam_role.lambda.name
+  policy_arn = aws_iam_policy.lambda-logs.arn
+}
+
+resource "aws_iam_policy" "lambda-logs" {
+  name   = "${local.project_name}-lambda-logs"
+  policy = data.aws_iam_policy_document.lambda-logs.json
 }
