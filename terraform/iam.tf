@@ -11,57 +11,41 @@ data "aws_iam_policy_document" "ecs" {
   }
 }
 
-data "aws_iam_policy_document" "app-ecr" {
-  statement {
-    actions   = ["ecr:GetAuthorizationToken"]
-    resources = ["*"]
-  }
-
+data "aws_iam_policy_document" "ecs-task-execution" {
   statement {
     actions = [
+      "ecr:GetAuthorizationToken",
       "ecr:BatchCheckLayerAvailability",
       "ecr:GetDownloadUrlForLayer",
       "ecr:BatchGetImage",
     ]
 
-    resources = [aws_ecr_repository.app.arn]
+    resources = ["*"]
   }
-}
 
-data "aws_iam_policy_document" "app-awslogs" {
   statement {
     actions = [
       "logs:CreateLogStream",
       "logs:PutLogEvents"
     ]
 
-    resources = [aws_cloudwatch_log_group.app.arn]
+    resources = ["*"]
   }
 }
 
-resource "aws_iam_role" "app" {
-  name               = "${local.project_name}-app"
+resource "aws_iam_role" "ecs-task-execution" {
+  name               = "${local.project_name}-ecs-task-execution"
   assume_role_policy = data.aws_iam_policy_document.ecs.json
 }
 
-resource "aws_iam_role_policy_attachment" "app-ecr" {
-  role       = aws_iam_role.app.name
-  policy_arn = aws_iam_policy.app-ecr.arn
+resource "aws_iam_role_policy_attachment" "ecs-task-execution" {
+  role       = aws_iam_role.ecs-task-execution.name
+  policy_arn = aws_iam_policy.ecs-task-execution.arn
 }
 
-resource "aws_iam_role_policy_attachment" "app-awslogs" {
-  role       = aws_iam_role.app.name
-  policy_arn = aws_iam_policy.app-awslogs.arn
-}
-
-resource "aws_iam_policy" "app-ecr" {
-  name   = "${local.project_name}-app-ecr"
-  policy = data.aws_iam_policy_document.app-ecr.json
-}
-
-resource "aws_iam_policy" "app-awslogs" {
-  name   = "${local.project_name}-app-awslogs"
-  policy = data.aws_iam_policy_document.app-awslogs.json
+resource "aws_iam_policy" "ecs-task-execution" {
+  name   = "${local.project_name}-ecs-task-execution"
+  policy = data.aws_iam_policy_document.ecs-task-execution.json
 }
 
 # CloudWatch Events Target

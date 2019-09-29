@@ -31,7 +31,7 @@ resource "aws_ecs_task_definition" "app" {
   cpu                      = 0.25 * 1024
   memory                   = 512
   network_mode             = "awsvpc"
-  execution_role_arn       = aws_iam_role.app.arn
+  execution_role_arn       = aws_iam_role.ecs-task-execution.arn
 }
 
 resource "aws_ecs_service" "app" {
