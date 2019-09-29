@@ -1,10 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/labstack/echo"
 )
+
+var defaultPort = "8080"
 
 func main() {
 	e := echo.New()
@@ -17,5 +21,10 @@ func main() {
 		return c.String(http.StatusOK, "ok")
 	})
 
-	e.Logger.Fatal(e.Start(":8080"))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = defaultPort
+	}
+
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", port)))
 }
