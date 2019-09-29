@@ -6,12 +6,17 @@ import (
 	"os"
 
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
 var defaultPort = "8080"
 
 func main() {
 	e := echo.New()
+	e.HideBanner = true
+	e.HidePort = true
+
+	e.Use(middleware.Logger())
 
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, world!")
