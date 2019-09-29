@@ -36,6 +36,7 @@
         "awslogs-stream-prefix": "fargate"
       }
     },
-    "memoryReservation": 50
+    "memoryReservation": 50,
+    "user": "0"
   }
 ]
