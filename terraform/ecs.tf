@@ -5,9 +5,12 @@ data "template_file" "task-definition-app" {
   template = file("${path.module}/task_definitions/app.json")
 
   vars = {
-    app_image          = aws_ecr_repository.app.repository_url
-    app_log_group_name = aws_cloudwatch_log_group.app.name
-    app_log_region     = data.aws_region.current.name
+    app_image                 = aws_ecr_repository.app.repository_url
+    app_log_region            = data.aws_region.current.name
+    app_log_stream_name       = aws_kinesis_firehose_delivery_stream.firelens.name
+    log_router_image          = "906394416424.dkr.ecr.ap-northeast-1.amazonaws.com/aws-for-fluent-bit:latest"
+    log_router_log_region     = data.aws_region.current.name
+    log_router_log_group_name = aws_cloudwatch_log_group.log-router.name
   }
 }
 
@@ -32,6 +35,7 @@ resource "aws_ecs_task_definition" "app" {
   memory                   = 512
   network_mode             = "awsvpc"
   execution_role_arn       = aws_iam_role.ecs-task-execution.arn
+  task_role_arn            = aws_iam_role.ecs-task-app.arn
 }
 
 resource "aws_ecs_service" "app" {

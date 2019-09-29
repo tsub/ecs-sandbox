@@ -48,6 +48,36 @@ resource "aws_iam_policy" "ecs-task-execution" {
   policy = data.aws_iam_policy_document.ecs-task-execution.json
 }
 
+# ECS Task Role
+
+data "aws_iam_policy_document" "ecs-task-app" {
+  statement {
+    actions = [
+      "firehose:DeleteDeliveryStream",
+      "firehose:PutRecord",
+      "firehose:PutRecordBatch",
+      "firehose:UpdateDestination"
+    ]
+
+    resources = [aws_kinesis_firehose_delivery_stream.firelens.arn]
+  }
+}
+
+resource "aws_iam_role" "ecs-task-app" {
+  name               = "${local.project_name}-ecs-task-app"
+  assume_role_policy = data.aws_iam_policy_document.ecs.json
+}
+
+resource "aws_iam_role_policy_attachment" "ecs-task-app" {
+  role       = aws_iam_role.ecs-task-app.name
+  policy_arn = aws_iam_policy.ecs-task-app.arn
+}
+
+resource "aws_iam_policy" "ecs-task-app" {
+  name   = "${local.project_name}-ecs-task-app"
+  policy = data.aws_iam_policy_document.ecs-task-app.json
+}
+
 # CloudWatch Events Target
 
 data "aws_iam_policy_document" "cwe" {
@@ -347,4 +377,64 @@ resource "aws_iam_policy" "codebuild" {
   ]
 }
 EOF
+}
+
+# Kinesis Data Firehose
+
+data "aws_iam_policy_document" "firehose" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["firehose.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "sts:ExternalId"
+      values   = [data.aws_caller_identity.current.account_id]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "firehose-to-s3" {
+  statement {
+    actions = [
+      "s3:AbortMultipartUpload",
+      "s3:GetBucketLocation",
+      "s3:GetObject",
+      "s3:ListBucket",
+      "s3:ListBucketMultipartUploads",
+      "s3:PutObject"
+    ]
+
+    resources = [
+      aws_s3_bucket.firehose.arn,
+      "${aws_s3_bucket.firehose.arn}/*"
+    ]
+  }
+
+  statement {
+    actions = [
+      "logs:PutLogEvents"
+    ]
+
+    resources = [aws_cloudwatch_log_group.firehose.arn]
+  }
+}
+
+resource "aws_iam_role" "firehose" {
+  name               = "${local.project_name}-firehose"
+  assume_role_policy = data.aws_iam_policy_document.firehose.json
+}
+
+resource "aws_iam_role_policy_attachment" "firehose" {
+  role       = aws_iam_role.firehose.name
+  policy_arn = aws_iam_policy.firehose-to-s3.arn
+}
+
+resource "aws_iam_policy" "firehose-to-s3" {
+  name   = "${local.project_name}-firehose-to-s3"
+  policy = data.aws_iam_policy_document.firehose-to-s3.json
 }

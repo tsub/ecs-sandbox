@@ -10,12 +10,32 @@
       }
     ],
     "logConfiguration": {
-      "logDriver": "awslogs",
+      "logDriver": "awsfirelens",
       "options": {
-        "awslogs-region": "${app_log_region}",
-        "awslogs-group": "${app_log_group_name}",
-        "awslogs-stream-prefix": "fargate"
+        "Name": "firehose",
+        "region": "${app_log_region}",
+        "delivery_stream": "${app_log_stream_name}"
       }
     }
+  },
+  {
+    "essential": true,
+    "image": "${log_router_image}",
+    "name": "log_router",
+    "firelensConfiguration": {
+      "type": "fluentbit",
+      "options": {
+        "enable-ecs-log-metadata": "true"
+      }
+    },
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${log_router_log_group_name}",
+        "awslogs-region": "${log_router_log_region}",
+        "awslogs-stream-prefix": "fargate"
+      }
+    },
+    "memoryReservation": 50
   }
 ]
