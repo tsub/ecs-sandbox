@@ -38,39 +38,3 @@ resource "aws_lb_listener" "https" {
     }
   }
 }
-
-resource "aws_lb_listener_rule" "app" {
-  listener_arn = aws_lb_listener.https.arn
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.app.arn
-  }
-
-  condition {
-    field  = "host-header"
-    values = [aws_route53_record.app.name]
-  }
-}
-
-resource "aws_lb_target_group" "app" {
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  # Workaround for error that "name_prefix" cannot be longer than 6 characters
-  name_prefix = "app-"
-
-  port                 = 8080
-  protocol             = "HTTP"
-  vpc_id               = module.vpc.vpc_id
-  target_type          = "ip"
-  deregistration_delay = 60
-
-  health_check {
-    path     = "/healthz"
-    port     = 8080
-    protocol = "HTTP"
-    matcher  = "200"
-  }
-}

@@ -48,36 +48,6 @@ resource "aws_iam_policy" "ecs-task-execution" {
   policy = data.aws_iam_policy_document.ecs-task-execution.json
 }
 
-# ECS Task Role
-
-data "aws_iam_policy_document" "ecs-task-app" {
-  statement {
-    actions = [
-      "firehose:DeleteDeliveryStream",
-      "firehose:PutRecord",
-      "firehose:PutRecordBatch",
-      "firehose:UpdateDestination"
-    ]
-
-    resources = [aws_kinesis_firehose_delivery_stream.firelens.arn]
-  }
-}
-
-resource "aws_iam_role" "ecs-task-app" {
-  name               = "${local.project_name}-ecs-task-app"
-  assume_role_policy = data.aws_iam_policy_document.ecs.json
-}
-
-resource "aws_iam_role_policy_attachment" "ecs-task-app" {
-  role       = aws_iam_role.ecs-task-app.name
-  policy_arn = aws_iam_policy.ecs-task-app.arn
-}
-
-resource "aws_iam_policy" "ecs-task-app" {
-  name   = "${local.project_name}-ecs-task-app"
-  policy = data.aws_iam_policy_document.ecs-task-app.json
-}
-
 # CloudWatch Events Target
 
 data "aws_iam_policy_document" "cwe" {
